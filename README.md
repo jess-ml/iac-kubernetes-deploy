@@ -15,7 +15,7 @@ orchestré dans un environnement **GitHub Codespaces**.
 ---
 
 ## 🔄 Workflow du projet
-
+```
 Packer → Image Nginx personnalisée
 ↓
 K3d  → Cluster Kubernetes local (1 control-plane + 2 workers)
@@ -23,7 +23,7 @@ K3d  → Cluster Kubernetes local (1 control-plane + 2 workers)
 Ansible → Déploiement de l'application sur le cluster
 ↓
 GitHub Codespaces → Environnement de développement unifié
-
+```
 ---
 
 ## 🛠️ Stack technique
@@ -40,7 +40,7 @@ GitHub Codespaces → Environnement de développement unifié
 ---
 
 ## 📁 Structure du repo
-
+```
 iac-kubernetes-deploy/
 ├── README.md
 ├── packer/
@@ -51,7 +51,7 @@ iac-kubernetes-deploy/
 └── k8s/
 ├── nginx-deployment.yaml   # Déploiement Kubernetes
 └── nginx-service.yaml      # Service Kubernetes
-
+```
 
 ---
 
