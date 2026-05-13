@@ -1,0 +1,59 @@
+---
+- name: Déploiement Nginx sur cluster K3d
+  hosts: localhost
+  connection: local
+  vars:
+    cluster_name: "mon-cluster"
+    image_name: "custom-nginx"
+    image_tag: "latest"
+    namespace: "default"
+    replicas: 2
+
+  tasks:
+
+    - name: Vérifier que K3d est installé
+      command: k3d version
+      register: k3d_version
+      changed_when: false
+
+    - name: Afficher la version K3d
+      debug:
+        msg: "{{ k3d_version.stdout }}"
+
+    - name: Créer le cluster K3d si inexistant
+      command: >
+        k3d cluster create {{ cluster_name }}
+        --agents 2
+        --port "8080:80@loadbalancer"
+      register: cluster_create
+      failed_when: 
+        - cluster_create.rc != 0
+        - "'already exists' not in cluster_create.stderr"
+      changed_when: "'already exists' not in cluster_create.stderr"
+
+    - name: Importer l'image Nginx dans K3d
+      command: k3d image import {{ image_name }}:{{ image_tag }} -c {{ cluster_name }}
+      changed_when: true
+
+    - name: Déployer Nginx sur Kubernetes
+      command: kubectl apply -f ../k8s/nginx-deployment.yaml
+      changed_when: true
+
+    - name: Déployer le Service Kubernetes
+      command: kubectl apply -f ../k8s/nginx-service.yaml
+      changed_when: true
+
+    - name: Attendre que les pods soient prêts
+      command: >
+        kubectl rollout status deployment/nginx-deployment
+        --timeout=120s
+      changed_when: false
+
+    - name: Afficher les pods déployés
+      command: kubectl get pods -o wide
+      register: pods
+      changed_when: false
+
+    - name: Résultat
+      debug:
+        msg: "{{ pods.stdout_lines }}"
